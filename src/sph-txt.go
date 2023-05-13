@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +16,12 @@ var ASSEMBLY_AI_API_KEY = os.Getenv("ASSEMBLY_AI_API_KEY")
 
 // Make a post request to the AssemblyAI API and retrieve the id of the transcript
 func requestTranscript(url string, client http.Client) (string, error) {
-	req, err := http.NewRequest("POST", "https://api.assemblyai.com/v2/transcript", bytes.NewBuffer([]byte(`{audio_url": url}`)))
+	values := map[string]string{"audio_url": url}
+	jsonData, err := json.Marshal(values)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequest("POST", "https://api.assemblyai.com/v2/transcript", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", err
 	}
@@ -26,13 +32,19 @@ func requestTranscript(url string, client http.Client) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	//Decode the response
-	var data map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
-	log.Println(data)
+	//Decode the response
+	var data map[string]interface{}
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		return "", err
+	}
+	if data["error"] != nil {
+		return "", fmt.Errorf(data["error"].(string))
+	}
 	//Get the id of the transcript
 	id := data["id"].(string)
 	return id, nil

@@ -83,13 +83,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "" && len(m.Attachments) > 0 {
 		//If the attachment is a voice message
 		if m.Attachments[0].ContentType == "audio/ogg" {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "I see you attached a voice message !")
+			_, _ = s.ChannelMessageSend(m.ChannelID, "I see you attached a voice message ! Please wait while I convert it to text...")
 			txt, err := ToText(m.Attachments[0].URL)
 			if err != nil {
 				log.Println("Error while converting voice to text:", err)
+				_, _ = s.ChannelMessageSend(m.ChannelID, "Sorry, I couldn't convert your voice message to text.")
 				return
 			}
-			_, _ = s.ChannelMessageSend(m.ChannelID, "Here is the text I got from your voice message:\n"+txt)
+			_, _ = s.ChannelMessageSend(m.ChannelID, "Here is the text:\n```"+txt+"```")
 		}
 	}
 }
