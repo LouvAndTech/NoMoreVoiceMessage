@@ -46,9 +46,10 @@ func main() {
 	})
 
 	s.AddHandler(messageCreate)
+	s.AddHandler(messageReactionAdd)
 
 	// In this example, we only care about receiving message events.
-	s.Identify.Intents = discordgo.IntentsGuildMessages
+	s.Identify.Intents = discordgo.IntentsGuildMessages | discordgo.IntentGuildMessageReactions
 
 	err := s.Open()
 	if err != nil {
@@ -83,16 +84,44 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "" && len(m.Attachments) > 0 {
 		//If the attachment is a voice message
 		if m.Attachments[0].ContentType == "audio/ogg" {
-			prov, _ := s.ChannelMessageSendReply(m.ChannelID, "I see you attached a voice message ! Please wait while I convert it to text...", m.Reference())
-			txt, err := ToText(m.Attachments[0].URL)
-			if err != nil {
-				log.Println("Error while converting voice to text:", err)
-				_ = s.ChannelMessageDelete(m.ChannelID, prov.ID)
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Sorry, I couldn't convert your voice message to text.", m.Reference())
-				return
-			}
-			_ = s.ChannelMessageDelete(m.ChannelID, prov.ID)
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Here is the text:\n```"+txt+"```", m.Reference())
+			_ = s.MessageReactionAdd(m.ChannelID, m.ID, "🇫🇷")
+			_ = s.MessageReactionAdd(m.ChannelID, m.ID, "🇺🇸")
 		}
+	}
+}
+
+func messageReactionAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
+	// Ignore all reactions created by the bot itself
+	if r.UserID == s.State.User.ID {
+		return
+	}
+	m, _ := s.ChannelMessage(r.ChannelID, r.MessageID)
+	// only care if the reaction is on a voice message and if it's with a flag
+	if m.Attachments[0].ContentType == "audio/ogg" && (r.Emoji.Name == "🇫🇷" || r.Emoji.Name == "🇺🇸") {
+		//Send a message to say that we are converting the voice message
+		prov, _ := s.ChannelMessageSendReply(m.ChannelID, "I see you wanna convert a voice message ! Please wait while I convert it to text...", m.Reference())
+		//Check the emoji
+		var txt string
+		var err error
+		switch r.Emoji.Name {
+		case "🇫🇷":
+			//Convert using the french model
+			txt, err = ToText(m.Attachments[0].URL, "fr_fr")
+		case "🇺🇸":
+			//Convert using the english model
+			txt, err = ToText(m.Attachments[0].URL, "en_us")
+		default:
+			return
+		}
+
+		//Remove the reactions
+		_ = s.ChannelMessageDelete(prov.ChannelID, prov.ID)
+		if err != nil {
+			log.Println("Error while converting voice to text:", err)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Sorry, I couldn't convert your voice message to text.", m.Reference())
+			return
+		}
+		//Send the text
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, "Here is the text:\n```"+txt+"```", m.Reference())
 	}
 }

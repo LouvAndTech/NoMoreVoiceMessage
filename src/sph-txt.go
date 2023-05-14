@@ -15,8 +15,8 @@ import (
 var ASSEMBLY_AI_API_KEY = os.Getenv("ASSEMBLY_AI_API_KEY")
 
 // Make a post request to the AssemblyAI API and retrieve the id of the transcript
-func requestTranscript(url string, client http.Client) (string, error) {
-	values := map[string]string{"audio_url": url}
+func requestTranscript(url string, lng string, client http.Client) (string, error) {
+	values := map[string]string{"audio_url": url, "language_code": lng}
 	jsonData, err := json.Marshal(values)
 	if err != nil {
 		return "", err
@@ -82,9 +82,9 @@ func getTranscript(id string, client http.Client) (string, error) {
 	return "", fmt.Errorf("Timeout")
 }
 
-func ToText(url string) (string, error) {
+func ToText(url string, lng string) (string, error) {
 	client := &http.Client{}
-	id, err := requestTranscript(url, *client)
+	id, err := requestTranscript(url, lng, *client)
 	if err != nil {
 		log.Println("Error requesting transcript:", err)
 		return "", err
