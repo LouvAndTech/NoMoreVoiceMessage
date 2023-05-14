@@ -14,5 +14,5 @@ ___
 - #### Download the source code and run it yourself :
     *You need to know what you're doing in go and a bit of docker*
 - #### Use the docker image to run it :
-    *You can use the [docker-compose file in the repo](https://github.com/LouvAndTech/xkcd-bot/blob/main/utils/docker-compose.yml) to deploy it.*
+    *You can use the [docker-compose file in the repo](https://github.com/LouvAndTech/NoMoreVoiceMessage/blob/main/utils/docker-compose.yml) to deploy it.*
     - [Docker hub link](https://hub.docker.com/repository/docker/louvandtech/nmvm)
