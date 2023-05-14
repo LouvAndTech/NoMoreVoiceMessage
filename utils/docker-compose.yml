@@ -1,0 +1,9 @@
+version: '3.4'
+services:
+  nmvm-bot:
+    image: louvandtech/nmvm-bot:latest
+    container_name: nmvm-bot
+    restart: unless-stopped
+    environment:
+      TOKEN: <YOUR_DISCORD_BOT_TOKEN> # get it from https://discord.com/developers/applications
+      ASSEMBLY_AI_API_KEY: <YOUR_ASSEMBLY_AI_API_KEY> # get it from https://app.assemblyai.com/login
