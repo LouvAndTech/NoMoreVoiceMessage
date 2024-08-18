@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   nmvm-bot:
-    image: louvandtech/nmvm-bot:latest
+    image: louvandtech/nmvm:latest
     container_name: nmvm-bot
     restart: unless-stopped
     environment:
