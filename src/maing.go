@@ -106,7 +106,7 @@ func messageReactionAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		switch r.Emoji.Name {
 		case "🇫🇷":
 			//Convert using the french model
-			txt, err = ToText(m.Attachments[0].URL, "fr_fr")
+			txt, err = ToText(m.Attachments[0].URL, "fr")
 		case "🇺🇸":
 			//Convert using the english model
 			txt, err = ToText(m.Attachments[0].URL, "en_us")
